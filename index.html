@@ -1,16 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>3D Multiplayer Game</title>
+    <style>
+        body {
+            margin: 0px;
+        }
+    </style>
 </head>
+
 <body>
+    <script src="http.js"></script>
     <script src="https://unpkg.com/three@0.141.0/build/three.js"></script>
     <script src="https://unpkg.com/three@0.141.0/examples/js/controls/PointerLockControls.js"></script>
     <script>
+        var spaceDown = false;
+        var shiftDown = false;
+        var wDown = false;
+        var aDown = false;
+        var sDown = false;
+        var dDown = false;
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        window.onresize = function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        var capsuleGeometry = new THREE.CapsuleGeometry();
+        var playerMaterial = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('https://i.kym-cdn.com/entries/icons/original/000/006/506/pogchamp.png') });
+        var playerMeshes = [];
+
+        var skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000, 1000);
+        var material = [
+            new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: new THREE.TextureLoader().load('Daylight Box_Right.bmp') }),
+            new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: new THREE.TextureLoader().load('Daylight Box_Left.bmp') }),
+            new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: new THREE.TextureLoader().load('Daylight Box_Top.bmp') }),
+            new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: new THREE.TextureLoader().load('Daylight Box_Bottom.bmp') }),
+            new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: new THREE.TextureLoader().load('Daylight Box_Front.bmp') }),
+            new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: new THREE.TextureLoader().load('Daylight Box_Back.bmp') })
+        ];
+        var skybox = new THREE.Mesh(skyboxGeo, material);
+        scene.add(skybox);
         
+        var controls = new THREE.PointerLockControls(camera, document.body);
+        document.onclick = function () {
+            controls.lock();
+        }
+        document.onkeydown = function (event) {
+            if (event.code == 'KeyW') {
+                wDown = true;
+            }
+            if (event.code == 'KeyS') {
+                sDown = true;
+            }
+            if (event.code == 'KeyA') {
+                aDown = true;
+            }
+            if (event.code == 'KeyD') {
+                dDown = true;
+            }
+            if (event.code == 'ShiftLeft') {
+                shiftDown = true;
+            }
+            if (event.code == 'Space') {
+                spaceDown = true;
+            }
+        }
+        document.onkeyup = function (event) {
+            if (event.code == 'KeyW') {
+                wDown = false;
+            }
+            if (event.code == 'KeyS') {
+                sDown = false;
+            }
+            if (event.code == 'KeyA') {
+                aDown = false;
+            }
+            if (event.code == 'KeyD') {
+                dDown = false;
+            }
+            if (event.code == 'ShiftLeft') {
+                shiftDown = false;
+            }
+            if (event.code == 'Space') {
+                spaceDown = false;
+            }
+        }
+
+        function loop() {
+            if (wDown) {
+                controls.moveForward(0.1);
+            }
+            if (sDown) {
+                controls.moveForward(-0.1);
+            }
+            if (dDown) {
+                controls.moveRight(0.1);
+            }
+            if (aDown) {
+                controls.moveRight(-0.1);
+            }
+            if (spaceDown) {
+                camera.position.y += 0.1;
+            }
+            if (shiftDown) {
+                camera.position.y -= 0.1;
+            }
+            console.log(camera.position);
+            /*request('http://localhost:8080/set?player=' + playerId + '&x=' + camera.position.x + '&y=' + camera.position.y + '&z=' + camera.position.z, function () {
+                request('http://localhost:8080/get', function (data) {
+                    var players = JSON.parse(data);
+                    for (var i = 0; i < players.length; i++) {
+                        // if the player currently exists
+                        if (players[i]) {
+                            // if the player is not ourself
+                            if (i !== playerId) {
+                                // if the player is in the scene
+                                if (playerMeshes[i]) {
+                                    playerMeshes[i].position.set(players[i].x, players[i].y, players[i].z);
+                                }
+                                // if not
+                                else {
+                                    playerMeshes[i] = new THREE.Mesh(capsuleGeometry, playerMaterial);
+                                    scene.add(playerMeshes[i]);
+                                    playerMeshes[i].position.set(players[i].x, players[i].y, players[i].z);
+                                }
+                            }
+                        }
+                        // if not
+                        else {
+                            // if the player has a mesh
+                            if (playerMeshes[i]) {
+                                scene.remove(playerMeshes[i]);
+                                delete playerMeshes[i];
+                            }
+                        }
+                    }*/
+                    renderer.render(scene, camera);
+                    requestAnimationFrame(loop);
+                /*});
+            });*/
+        }
+        /*var playerId = 0;
+        request('http://localhost:8080/join', function (data) {
+            playerId = parseInt(data);
+            requestAnimationFrame(loop);
+        });*/
+        requestAnimationFrame(loop);
     </script>
 </body>
+
 </html>
